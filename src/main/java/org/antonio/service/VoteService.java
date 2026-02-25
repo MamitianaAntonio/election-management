@@ -1,6 +1,8 @@
 package org.antonio.service;
 
 import org.antonio.config.DBConnection;
+import org.antonio.model.CandidateVoteCount;
+import org.antonio.model.VoteSummary;
 import org.antonio.model.VoteType;
 import org.antonio.model.VoteTypeCount;
 
@@ -56,5 +58,60 @@ public class VoteService {
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  // question 3
+  public List<CandidateVoteCount> countValidVotesByCandidate () {
+    List<CandidateVoteCount> result = new ArrayList<>();
+    String sql = """
+       select c.name as candidate_name, count(v.id) as total_valid
+           from candidate c
+           left join vote v on c.id = v.candidate_id
+           and v.vote_type = 'VALID'
+           group by c.name;
+    """;
+
+    try (Connection connection = DBConnection.getConnection();
+         PreparedStatement ps = connection.prepareStatement(sql)) {
+      ResultSet rs = ps.executeQuery();
+
+      while (rs.next()) {
+        CandidateVoteCount candidateVoteCount = new CandidateVoteCount();
+        candidateVoteCount.setCandidateName(rs.getString("candidate_name"));
+        candidateVoteCount.setValidVoteCount(rs.getLong("total_valid"));
+        result.add(candidateVoteCount);
+      }
+
+      return result;
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  // question 4
+  public VoteSummary computeVoteSummary () {
+    String sql = """
+        select
+          sum(case when v.vote_type = 'VALID' then 1 else 0 end) as valid_count,
+          sum(case when v.vote_type = 'BLANK' then 1 else 0 end) as blank_count,
+          sum(case when v.vote_type = 'NULL' then 1 else 0 end) as null_count
+        from vote v;
+    """ ;
+
+    try (Connection connection = DBConnection.getConnection();
+      PreparedStatement ps = connection.prepareStatement(sql)) {
+      ResultSet rs = ps.executeQuery();
+      if (rs.next()) {
+        VoteSummary voteSummary = new VoteSummary();
+        voteSummary.setValidCount(rs.getLong("valid_count"));
+        voteSummary.setBlankCount(rs.getLong("blank_count"));
+        voteSummary.setNullCount(rs.getLong("null_count"));
+        return voteSummary;
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+
+    return null;
   }
 }
