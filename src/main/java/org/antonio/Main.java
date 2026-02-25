@@ -1,12 +1,19 @@
 package org.antonio;
 
+import org.antonio.model.VoteTypeCount;
 import org.antonio.service.VoteService;
+
+import java.util.List;
 
 public class Main {
   public static void main(String[] args) {
-    // question 1
     VoteService service = new VoteService();
+    // question 1
     long totalVotes = service.countAllVotes();
     System.out.println("totalVote=" + totalVotes);
+
+    // question 2
+    List<VoteTypeCount> voteByType = service.countVotesByTypes();
+    System.out.println(voteByType);
   }
 }
