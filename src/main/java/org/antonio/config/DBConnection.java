@@ -6,7 +6,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class BDConnection {
+public class DBConnection {
   private static Dotenv dotenv = Dotenv.load();
   private static final String URL = dotenv.get("DB_URL");
   private static final String USER = dotenv.get("DB_USER");
