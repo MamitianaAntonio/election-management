@@ -1,6 +1,7 @@
 package org.antonio;
 
 import org.antonio.model.CandidateVoteCount;
+import org.antonio.model.ElectionResult;
 import org.antonio.model.VoteSummary;
 import org.antonio.model.VoteTypeCount;
 import org.antonio.service.VoteService;
@@ -25,5 +26,13 @@ public class Main {
     // question 4
     VoteSummary voteSummary = service.computeVoteSummary();
     System.out.println(voteSummary);
+
+    // question 5
+    double voteTurnoutRate = service.computeTurnoutRate();
+    System.out.println(voteTurnoutRate);
+
+    // question 6
+    ElectionResult electionResult = service.findWinner();
+    System.out.println(electionResult);
   }
 }

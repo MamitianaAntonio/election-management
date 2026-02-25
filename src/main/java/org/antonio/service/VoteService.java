@@ -1,10 +1,7 @@
 package org.antonio.service;
 
 import org.antonio.config.DBConnection;
-import org.antonio.model.CandidateVoteCount;
-import org.antonio.model.VoteSummary;
-import org.antonio.model.VoteType;
-import org.antonio.model.VoteTypeCount;
+import org.antonio.model.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -112,6 +109,60 @@ public class VoteService {
       throw new RuntimeException(e);
     }
 
+    return null;
+  }
+
+  // question 5
+  public double computeTurnoutRate() {
+    String sql = """
+        SELECT
+            COUNT(DISTINCT v.voter_id) AS voters_who_voted,
+            (SELECT COUNT(id) FROM voter) AS total_voters,
+            COUNT(DISTINCT v.voter_id) * 100.0 / (SELECT COUNT(id) FROM voter) AS turnout_rate
+        FROM vote v;
+    """;
+
+    try (Connection connection = DBConnection.getConnection();
+         PreparedStatement ps = connection.prepareStatement(sql)) {
+      ResultSet rs = ps.executeQuery();
+      if (rs.next()) {
+        long votersWhoVoted = rs.getLong("voters_who_voted");
+        long totalVoters = rs.getLong("total_voters");
+        double turnoutRate = rs.getDouble("turnout_rate");
+        System.out.println("Voters who voted: " + votersWhoVoted);
+        System.out.println("Total voters: " + totalVoters);
+        return turnoutRate;
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+    return 0;
+  }
+
+  // question 6
+  public ElectionResult findWinner() {
+    String sql = """
+        SELECT c.name AS candidate_name,
+               SUM(CASE WHEN v.vote_type = 'VALID' THEN 1 ELSE 0 END) AS valid_vote_count
+        FROM vote v
+        JOIN candidate c ON v.candidate_id = c.id
+        GROUP BY c.name
+        ORDER BY valid_vote_count DESC
+        LIMIT 1;
+    """;
+
+    try (Connection connection = DBConnection.getConnection();
+         PreparedStatement ps = connection.prepareStatement(sql)) {
+      ResultSet rs = ps.executeQuery();
+      if (rs.next()) {
+        return new ElectionResult(
+            rs.getString("candidate_name"),
+            rs.getLong("valid_vote_count")
+        );
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
     return null;
   }
 }
