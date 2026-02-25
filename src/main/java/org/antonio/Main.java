@@ -1,5 +1,6 @@
 package org.antonio;
 
+import org.antonio.model.CandidateVoteCount;
 import org.antonio.model.VoteTypeCount;
 import org.antonio.service.VoteService;
 
@@ -15,5 +16,9 @@ public class Main {
     // question 2
     List<VoteTypeCount> voteByType = service.countVotesByTypes();
     System.out.println(voteByType);
+
+    // question 3
+    List<CandidateVoteCount> validVotesByCandidate = service.countValidVotesByCandidate();
+    System.out.println(validVotesByCandidate);
   }
 }
