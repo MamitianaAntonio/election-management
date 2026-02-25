@@ -1,10 +1,7 @@
 package org.antonio.service;
 
 import org.antonio.config.DBConnection;
-import org.antonio.model.CandidateVoteCount;
-import org.antonio.model.VoteSummary;
-import org.antonio.model.VoteType;
-import org.antonio.model.VoteTypeCount;
+import org.antonio.model.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -114,4 +111,31 @@ public class VoteService {
 
     return null;
   }
+
+  // question 5
+  public double computeTurnoutRate() {
+    String sql = """
+        SELECT
+            COUNT(DISTINCT v.voter_id) AS voters_who_voted,
+            (SELECT COUNT(id) FROM voter) AS total_voters,
+            COUNT(DISTINCT v.voter_id) * 100.0 / (SELECT COUNT(id) FROM voter) AS turnout_rate
+        FROM vote v;
+    """;
+
+    try (Connection connection = DBConnection.getConnection();
+         PreparedStatement ps = connection.prepareStatement(sql)) {
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            long votersWhoVoted = rs.getLong("voters_who_voted");
+            long totalVoters = rs.getLong("total_voters");
+            double turnoutRate = rs.getDouble("turnout_rate");
+            System.out.println("Voters who voted: " + votersWhoVoted);
+            System.out.println("Total voters: " + totalVoters);
+            return turnoutRate;
+        }
+    } catch (SQLException e) {
+        throw new RuntimeException(e);
+    }
+    return 0;
+}
 }

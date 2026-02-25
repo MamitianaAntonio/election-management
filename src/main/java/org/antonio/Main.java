@@ -25,5 +25,9 @@ public class Main {
     // question 4
     VoteSummary voteSummary = service.computeVoteSummary();
     System.out.println(voteSummary);
+
+    // question 5
+    double voteTurnoutRate = service.computeTurnoutRate();
+    System.out.println(voteTurnoutRate);
   }
 }
